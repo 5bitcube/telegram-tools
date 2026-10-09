@@ -1,0 +1,9 @@
+﻿# secrets and local state
+config.json
+session.json
+# build output
+telegram-tools.exe
+*.exe
+# dumps
+*.txt
+!README.md
