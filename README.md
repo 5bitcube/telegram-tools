@@ -9,7 +9,8 @@ which the Bot API cannot do.
 1. Get API credentials: open https://my.telegram.org, log in with your phone,
    choose **API development tools** (App configuration) and create an app.
    Note the `api_id` (a number) and `api_hash` (a hex string).
-2. Fill `config.json` next to the exe:
+2. Copy `config.example.json` to `config.json` next to the exe and fill it in
+   (`config.json` and `session.json` are git-ignored, they never leave your machine):
 
    ```json
    {
