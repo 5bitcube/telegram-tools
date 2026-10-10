@@ -1,5 +1,6 @@
 // telegram-tools: log into Telegram as a user account over MTProto (gotd/td)
-// and dump chat history, something the Bot API cannot do.
+// to dump chat history, something the Bot API cannot do, and to send a text
+// message as that account (the send command, the only thing that writes).
 package main
 
 import (
@@ -35,7 +36,7 @@ type config struct {
 var errNotLoggedIn = errors.New("not logged in, run: telegram-tools login")
 
 func usage() {
-	fmt.Fprintf(os.Stderr, `telegram-tools: dump Telegram chat history as a user account (MTProto)
+	fmt.Fprintf(os.Stderr, `telegram-tools: read and send Telegram chat messages as a user account (MTProto)
 
 Usage:
   telegram-tools login                       log in (sends a code to the phone in config.json)
@@ -43,6 +44,7 @@ Usage:
   telegram-tools chats                       list dialogs: kind, id, title (tab separated)
   telegram-tools history --chat "<title or id>" [--since T] [--until T] [--from <name or id>] [--oldest] [--limit N] [--out file] [--json]
   telegram-tools search  --chat "<title or id>" --query "text" [--from <name or id>] [--oldest] [--limit N] [--out file] [--json]
+  telegram-tools send    --chat "<title or id>" --text "..." [--reply-to <msg id>] [--json]   (empty --text: read stdin)
 
 Run "telegram-tools <command> --help" for the flags of a command.
 Config is read from config.json and the session is kept in session.json, both next to the exe.
@@ -72,6 +74,8 @@ func main() {
 		err = cmdHistory(ctx, args)
 	case "search":
 		err = cmdSearch(ctx, args)
+	case "send":
+		err = cmdSend(ctx, args)
 	case "help", "-h", "--help", "-help":
 		usage()
 		return

@@ -2,7 +2,8 @@
 
 Small command line tool that logs into Telegram as a **user account** over MTProto
 (library: [gotd/td](https://github.com/gotd/td)) and dumps the history of a chat,
-which the Bot API cannot do.
+which the Bot API cannot do. It can also send a text message as your account with
+the `send` command; nothing else writes.
 
 ## Setup
 
@@ -48,6 +49,7 @@ Every command accepts `--help`.
 | `telegram-tools chats` | Lists all dialogs, one per line, tab separated: `kind  id  title`. Kind is `user`, `group` (basic group or supergroup) or `channel`. Your own Saved Messages are marked. |
 | `telegram-tools history --chat "<title or id>" [flags]` | Dumps the messages of a chat, oldest first. |
 | `telegram-tools search --chat "<title or id>" --query "text" [flags]` | Server-side text search in a chat (`messages.search`), same output as `history`. |
+| `telegram-tools send --chat "<title or id>" --text "..." [flags]` | Sends a text message to a chat **as your account**. The only command that writes. |
 
 Without a session every command prints `not logged in, run: telegram-tools login` and exits 1.
 
@@ -93,6 +95,23 @@ history and filters on the client; the result is the same, just slower.
 `--query` (required), plus `--from`, `--oldest`, `--limit`, `--out`, `--json` as
 above. `search` has no `--since`/`--until`.
 
+### send flags
+
+| Flag | Meaning |
+|---|---|
+| `--text "..."` | The message. When empty the text is read from stdin, so multi line messages can be piped in. |
+| `--reply-to <id>` | Reply to this message id (0, the default, means none). |
+| `--json` | Print the result as one JSON object: `{"id": 123, "date": "...", "chat": <id>}`. |
+
+Without `--json` it prints `sent message <id> to <title> at <time>`. The text is
+sent as plain text (no markdown parsing), at most 4096 characters. On any failure
+(unknown chat, empty text, Telegram error) nothing is printed on stdout, the error
+goes to stderr and the exit code is 1:
+
+```
+echo "hello from the terminal" | telegram-tools send --chat "Saved Messages" --json
+```
+
 ## Output format
 
 Text, one line per message:
@@ -132,5 +151,5 @@ go build -o telegram-tools.exe .
 ```
 
 Files: `main.go` (config, login, whoami), `chats.go` (dialogs, chat and sender
-matching), `history.go` (history, search, formatting), `floodwait.go`
-(FLOOD_WAIT retry middleware, flag helper).
+matching), `history.go` (history, search, formatting), `send.go` (send),
+`floodwait.go` (FLOOD_WAIT retry middleware, flag helper).
