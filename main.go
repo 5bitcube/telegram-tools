@@ -45,6 +45,7 @@ Usage:
   telegram-tools history --chat "<title or id>" [--since T] [--until T] [--from <name or id>] [--oldest] [--limit N] [--out file] [--json]
   telegram-tools search  --chat "<title or id>" --query "text" [--from <name or id>] [--oldest] [--limit N] [--out file] [--json]
   telegram-tools send    --chat "<title or id>" --text "..." [--reply-to <msg id>] [--json]   (empty --text: read stdin)
+  telegram-tools watch   [--chat "<title or id>"] ...         stream new messages as JSON lines (long-running)
 
 Run "telegram-tools <command> --help" for the flags of a command.
 Config is read from config.json and the session is kept in session.json, both next to the exe.
@@ -76,6 +77,8 @@ func main() {
 		err = cmdSearch(ctx, args)
 	case "send":
 		err = cmdSend(ctx, args)
+	case "watch":
+		err = cmdWatch(ctx, args)
 	case "help", "-h", "--help", "-help":
 		usage()
 		return
