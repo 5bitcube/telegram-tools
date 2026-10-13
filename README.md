@@ -3,7 +3,7 @@
 Small command line tool that logs into Telegram as a **user account** over MTProto
 (library: [gotd/td](https://github.com/gotd/td)) and dumps the history of a chat,
 which the Bot API cannot do. It can also send a text message as your account with
-the `send` command; nothing else writes.
+the `send` command, and stream new messages in real time with the `watch` command.
 
 ## Setup
 
@@ -50,6 +50,7 @@ Every command accepts `--help`.
 | `telegram-tools history --chat "<title or id>" [flags]` | Dumps the messages of a chat, oldest first. |
 | `telegram-tools search --chat "<title or id>" --query "text" [flags]` | Server-side text search in a chat (`messages.search`), same output as `history`. |
 | `telegram-tools send --chat "<title or id>" --text "..." [flags]` | Sends a text message to a chat **as your account**. The only command that writes. |
+| `telegram-tools watch [--chat "<title or id>"] ...` | Connects and streams new messages as JSON lines to stdout in real time. Stays connected until interrupted. |
 
 Without a session every command prints `not logged in, run: telegram-tools login` and exits 1.
 
@@ -112,6 +113,20 @@ goes to stderr and the exit code is 1:
 echo "hello from the terminal" | telegram-tools send --chat "Saved Messages" --json
 ```
 
+### watch flags
+
+| Flag | Meaning |
+|---|---|
+| `--chat "<title or id>"` | Only stream messages from this chat. Repeatable; without it, all chats are watched. |
+
+`watch` holds a persistent MTProto connection and outputs one JSON line per new or
+edited message. Each line has the same fields as `history --json` plus `chat_id`
+(the numeric id of the chat the message belongs to). Stop with Ctrl+C.
+
+```
+telegram-tools watch --chat "Agent Lab" --chat "Saved Messages"
+```
+
 ## Output format
 
 Text, one line per message:
@@ -152,4 +167,5 @@ go build -o telegram-tools.exe .
 
 Files: `main.go` (config, login, whoami), `chats.go` (dialogs, chat and sender
 matching), `history.go` (history, search, formatting), `send.go` (send),
-`floodwait.go` (FLOOD_WAIT retry middleware, flag helper).
+`watch.go` (real-time message streaming), `floodwait.go` (FLOOD_WAIT retry
+middleware, flag helper).
